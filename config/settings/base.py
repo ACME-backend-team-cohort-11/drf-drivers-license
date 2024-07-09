@@ -14,6 +14,8 @@ from pathlib import Path
 
 from config.settings.utils import get_bool_env, get_env_variable
 
+from datetime import timedelta
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -43,12 +45,17 @@ INSTALLED_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "drf_yasg",
-    "corsheaders"
+    "corsheaders",
+    'rest_framework_simplejwt'
 ]
 
 LOCAL_APPS = [
     "docs.app",
     "accounts",
+    "nationalId",
+    "license",
+    "application",
+    "dlPortal"
 ]
 
 INSTALLED_APPS += THIRD_PARTY_APPS + LOCAL_APPS
@@ -64,6 +71,11 @@ MIDDLEWARE = [
 ]
 
 AUTH_USER_MODEL = "accounts.User"
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
 
 ROOT_URLCONF = "config.urls"
 

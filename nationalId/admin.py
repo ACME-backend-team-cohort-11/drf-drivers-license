@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import NationalId
 
-# Register your models here.
+@admin.register(NationalId)
+class NationalIdAdmin(admin.ModelAdmin):
+    list_display = ('idNo', 'firstName', 'middleName', 'lastName', 'DOB', 'Sex', 'Passport', 'issuedAt')
+    search_fields = ('idNo', 'firstName', 'middleName', 'lastName')
