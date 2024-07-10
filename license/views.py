@@ -6,18 +6,33 @@ from .serializers import LicenseSerializer
 from django.shortcuts import get_object_or_404
 from datetime import date
 
-class LicenseValidityView(generics.RetrieveAPIView):
+class LicenseDetailView(generics.RetrieveAPIView):
     queryset = License.objects.all()
     serializer_class = LicenseSerializer
+
+    def get_object(self):
+        license_id = self.kwargs.get('license_id')  
+        return get_object_or_404(License, licenseId=license_id)
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
+        try:
+            instance = self.get_object()
+        except License.DoesNotExist:
+            return Response({'error': 'License does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
         today = date.today()
-        is_valid = instance.expiry_date >= today
-        return Response({'valid': is_valid})
 
+        if instance.expiry_date < today:
+            status_text = 'expired'
+        else:
+            status_text = 'valid'
 
-class LicenseDetailsView(generics.RetrieveAPIView):
-    queryset = License.objects.all()
-    serializer_class = LicenseSerializer
+        # Prepare the response data
+        response_data = {
+            'licenseId': instance.licenseId,
+            'issue_date': instance.issue_date,
+            'expiry_date': instance.expiry_date,
+            'status': status_text,
+        }
 
+        return Response(response_data, status=status.HTTP_200_OK)
