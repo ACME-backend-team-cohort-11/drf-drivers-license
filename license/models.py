@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from nationalId.models import NationalId
+from datetime import date
+
 
 class License(models.Model):
     IdNo = models.ForeignKey(NationalId,on_delete=models.CASCADE)
@@ -11,3 +13,5 @@ class License(models.Model):
 
     def __str__(self):
         return self.licenseId
+    
+    

@@ -10,11 +10,22 @@ class LicenseValidityView(generics.RetrieveAPIView):
     queryset = License.objects.all()
     serializer_class = LicenseSerializer
 
+    # def retrieve(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     today = date.today()
+    #     is_valid = instance.expiry_date >= today
+    #     return Response({'valid': is_valid})
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         today = date.today()
-        is_valid = instance.expiry_date >= today
-        return Response({'valid': is_valid})
+        
+        if instance.expiry_date < today:
+            status_text = 'expired'
+        else:
+            status_text = 'valid'
+        
+        return Response({'status': status_text}, status=status.HTTP_200_OK)
 
 
 class LicenseDetailsView(generics.RetrieveAPIView):
