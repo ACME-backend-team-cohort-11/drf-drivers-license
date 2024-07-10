@@ -1,5 +1,5 @@
 # views.py
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from .models import License
 from .serializers import LicenseSerializer
@@ -9,6 +9,7 @@ from datetime import date
 class LicenseDetailView(generics.RetrieveAPIView):
     queryset = License.objects.all()
     serializer_class = LicenseSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         license_id = self.kwargs.get('license_id')  
