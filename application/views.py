@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 
 class CreateDriversLicenseApplicationView(generics.CreateAPIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = DriversLicenseApplication.objects.all()
     serializer_class = DriversLicenseApplicationSerializer
 
@@ -31,7 +31,7 @@ class CreateDriversLicenseApplicationView(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class RenewDriversLicenseApplicationView(generics.CreateAPIView):
-    permission_classes = [permissions.AllowAny]  # Temporarily allow any user to access this view
+    permission_classes = [permissions.IsAuthenticated] 
     queryset = DriversLicenseApplication.objects.all()
     serializer_class = DriversLicenseApplicationSerializer
 
@@ -102,7 +102,7 @@ class RenewDriversLicenseApplicationView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 class ReissueDriversLicenseApplicationView(generics.CreateAPIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = DriversLicenseApplication.objects.all()
     serializer_class = DriversLicenseApplicationSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
