@@ -9,22 +9,19 @@ from django.contrib.auth import get_user_model, authenticate
 
 
 class RegisterView(APIView):
-    # Allow any user (authenticated or not) to access this view
     permission_classes = [AllowAny]
 
     def post(self, request):
-        # Create a new user
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            # Generate JWT tokens for the new user
             refresh = RefreshToken.for_user(user)
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
             }, status=status.HTTP_201_CREATED)
-        # If data is invalid, return error response
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 User = get_user_model()
 
@@ -38,6 +35,12 @@ class LoginView(APIView):
         if not email or not password:
             return Response({'error': 'Please provide both email and password'},
                             status=status.HTTP_400_BAD_REQUEST)
+
+        # Normalize the email
+        email = email.lower()
+
+        # Print email and password for debugging
+        print(f"Email: {email}, Password: {password}")
 
         # Authenticate user
         user = authenticate(request, email=email, password=password)
