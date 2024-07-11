@@ -1,10 +1,9 @@
 from config.settings.base import *
 from config.settings.utils import get_env_variable
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+# WARNING: Allowing any host can expose your application to security risks.
+# It's strongly recommended to specify explicit allowed hosts.
+ALLOWED_HOSTS = ['*']
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -69,3 +68,5 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 
 MEDIA_ROOT = BASE_DIR / "media"
+
+ROOT_URLCONF = "config.urls"

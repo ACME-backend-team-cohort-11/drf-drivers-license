@@ -11,6 +11,9 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 
 class CreateDriversLicenseApplicationView(generics.CreateAPIView):
+    """
+        Create a new driver's license application.
+    """
     permission_classes = [permissions.IsAuthenticated]
     queryset = DriversLicenseApplication.objects.all()
     serializer_class = DriversLicenseApplicationSerializer
@@ -25,17 +28,104 @@ class CreateDriversLicenseApplicationView(generics.CreateAPIView):
         serializer.save(nationalId=national_id)
 
     def create(self, request, *args, **kwargs):
+        """
+        Create a new driver's license application.
+
+        Parameters:
+        - is_motor_cycle (boolean): Whether the application is for a motorcycle license
+        - is_motor_vehicle (boolean): Whether the application is for a motor vehicle license
+        - certificate_number (integer): The certificate number
+        - nationalId (integer): The National ID number of the applicant
+        - application_type (string): The type of application (should be "New")
+        - license_id (string): The license ID (should be empty for new applications)
+        - status (string): The status of the application (e.g., "Pending")
+        - local_government_area (string): The local government area
+        - state (string): The state
+        - center_locations (string): The center locations
+        - email (string): The applicant's email address
+        - phoneNumber (string): The applicant's phone number
+        - reissue_reason (string): The reason for reissue (should be empty for new applications)
+        - reissue_police_report (file): Police report for reissue (should be null for new applications)
+        - previous_license_id (string): The previous license ID (should be empty for new applications)
+        - renewal_applied_at (datetime): When the renewal was applied (should be null for new applications)
+        - renewal_approved_at (datetime): When the renewal was approved (should be null for new applications)
+        - reissue_applied_at (datetime): When the reissue was applied (should be null for new applications)
+        - reissue_approved_at (datetime): When the reissue was approved (should be null for new applications)
+
+        Returns:
+        - 201 Created: Application created successfully
+            {
+                "application_id": "string (UUID)",
+                "nationalId": integer,
+                "is_motor_cycle": boolean,
+                "is_motor_vehicle": boolean,
+                "certificate_number": integer,
+                "applied_at": "datetime",
+                "application_type": "string",
+                "status": "string",
+                "local_government_area": "string",
+                "state": "string",
+                "center_locations": "string",
+                "email": "string",
+                "phoneNumber": "string",
+                "previous_license_id": "string",
+                "renewal_applied_at": "datetime or null",
+                "renewal_approved_at": "datetime or null",
+                "reissue_applied_at": "datetime or null",
+                "reissue_approved_at": "datetime or null",
+                "reissue_reason": "string",
+                "reissue_police_report": "file or null",
+                "license": "object or null"
+            }
+        - 400 Bad Request: Invalid data provided
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class RenewDriversLicenseApplicationView(generics.CreateAPIView):
+    """
+    Create a renewal application for an existing driver's license.
+    """
     permission_classes = [permissions.IsAuthenticated] 
     queryset = DriversLicenseApplication.objects.all()
     serializer_class = DriversLicenseApplicationSerializer
 
     def create(self, request, *args, **kwargs):
+        """
+        Create a renewal application for an existing driver's license.
+
+        Parameters:
+        - is_motor_cycle (boolean): Whether the application is for a motorcycle license
+        - is_motor_vehicle (boolean): Whether the application is for a motor vehicle license
+        - certificate_number (integer): The certificate number
+        - nationalId (integer): The National ID number of the applicant
+        - application_type (string): The type of application (should be "Renewal")
+        - license_id (string): The ID of the license to renew
+        - status (string): The status of the application (e.g., "Pending")
+        - local_government_area (string): The local government area
+        - state (string): The state
+        - center_locations (string): The center locations
+        - email (string): The applicant's email address
+        - phoneNumber (string): The applicant's phone number
+        - reissue_reason (string): The reason for reissue (should be empty for renewals)
+        - reissue_police_report (file): Police report for reissue (should be null for renewals)
+        - previous_license_id (string): The previous license ID (should be empty for renewals)
+        - renewal_applied_at (datetime): When the renewal was applied (should be null)
+        - renewal_approved_at (datetime): When the renewal was approved (should be null)
+        - reissue_applied_at (datetime): When the reissue was applied (should be null)
+        - reissue_approved_at (datetime): When the reissue was approved (should be null)
+
+        Returns:
+        - 201 Created: Renewal application created successfully
+            {
+                "message": "Renewal application submitted successfully.",
+                "application_id": "string (UUID)"
+            }
+        - 400 Bad Request: Invalid data or existing renewal application
+        - 404 Not Found: License not found
+        """
         license_id = self.kwargs.get('license_id')
         license = get_object_or_404(License, licenseId=license_id)
 
@@ -102,12 +192,50 @@ class RenewDriversLicenseApplicationView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 class ReissueDriversLicenseApplicationView(generics.CreateAPIView):
+    """
+    Create a reissue application for an existing driver's license.
+    """
     permission_classes = [permissions.IsAuthenticated]
     queryset = DriversLicenseApplication.objects.all()
     serializer_class = DriversLicenseApplicationSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def create(self, request, *args, **kwargs):
+        """
+        Create a reissue application for an existing driver's license.
+
+        This is a multipart form where the police report is uploaded as a file.
+
+        Parameters:
+        - is_motor_cycle (boolean): Whether the application is for a motorcycle license
+        - is_motor_vehicle (boolean): Whether the application is for a motor vehicle license
+        - certificate_number (integer): The certificate number
+        - nationalId (integer): The National ID number of the applicant
+        - application_type (string): The type of application (should be "Reissue")
+        - license_id (string): The ID of the license to reissue
+        - status (string): The status of the application (e.g., "Pending")
+        - local_government_area (string): The local government area
+        - state (string): The state
+        - center_locations (string): The center locations
+        - email (string): The applicant's email address
+        - phoneNumber (string): The applicant's phone number
+        - reissue_reason (string): The reason for reissue
+        - reissue_police_report (file): Police report for reissue
+        - previous_license_id (string): The previous license ID
+        - renewal_applied_at (datetime): When the renewal was applied (should be null for reissues)
+        - renewal_approved_at (datetime): When the renewal was approved (should be null for reissues)
+        - reissue_applied_at (datetime): When the reissue was applied (should be null)
+        - reissue_approved_at (datetime): When the reissue was approved (should be null)
+
+        Returns:
+        - 201 Created: Reissue application created successfully
+            {
+                "message": "Reissue application submitted successfully.",
+                "application_id": "string (UUID)"
+            }
+        - 400 Bad Request: Invalid data or existing renewal application
+        - 404 Not Found: License not found
+        """
         license_id = request.data.get('license_id')
         if not license_id:
             return Response({"error": "License ID is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -170,7 +298,3 @@ class ReissueDriversLicenseApplicationView(generics.CreateAPIView):
             "message": "Reissue application submitted successfully.",
             "application_id": reissue_application.application_id
         }, status=status.HTTP_201_CREATED)
-
-class RetrieveDriversLicenseApplicationView(generics.RetrieveAPIView):
-    queryset = DriversLicenseApplication.objects.all()
-    serializer_class = DriversLicenseApplicationSerializer

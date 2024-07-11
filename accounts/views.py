@@ -7,11 +7,35 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import CustomUserSerializer
 from django.contrib.auth import get_user_model, authenticate
 
-
 class RegisterView(APIView):
+    """
+    API view for user registration.
+
+    post:
+    Register a new user and return JWT tokens.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """
+        Register a new user.
+
+        Parameters:
+        - email (string): User's email address
+        - password (string): User's password
+        - other fields as required by CustomUserSerializer
+
+        Returns:
+        - 201 Created: User registered successfully
+            {
+                'refresh': 'refresh_token',
+                'access': 'access_token'
+            }
+        - 400 Bad Request: Invalid data
+            {
+                'field_name': ['error_message']
+            }
+        """
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
@@ -22,53 +46,73 @@ class RegisterView(APIView):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 User = get_user_model()
 
 class LoginView(APIView):
+    """
+    API view for user login.
+
+    post:
+    Authenticate a user and return JWT tokens.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """
+        Authenticate a user.
+
+        Parameters:
+        - email (string): User's email address
+        - password (string): User's password
+
+        Returns:
+        - 200 OK: User authenticated successfully
+            {
+                'refresh': 'refresh_token',
+                'access': 'access_token'
+            }
+        - 400 Bad Request: Missing email or password
+        - 401 Unauthorized: Invalid credentials
+        """
         email = request.data.get('email')
         password = request.data.get('password')
-
         if not email or not password:
             return Response({'error': 'Please provide both email and password'},
                             status=status.HTTP_400_BAD_REQUEST)
-
-        # Normalize the email
         email = email.lower()
-
-        # Print email and password for debugging
-        print(f"Email: {email}, Password: {password}")
-
-        # Authenticate user
         user = authenticate(request, email=email, password=password)
-
         if user:
-            # If authentication is successful, generate JWT tokens
             refresh = RefreshToken.for_user(user)
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
             })
-        
-        # If authentication fails, return error response
         return Response({'error': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class LogoutView(APIView):
-    # Only authenticated users can access this view
+    """
+    API view for user logout.
+
+    post:
+    Blacklist the user's refresh token.
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        """
+        Logout a user by blacklisting their refresh token.
+
+        Parameters:
+        - refresh_token (string): User's refresh token
+
+        Returns:
+        - 205 Reset Content: Successfully logged out
+        - 400 Bad Request: Invalid token or other error
+        """
         try:
-            # Get the refresh token from the request data
             refresh_token = request.data["refresh_token"]
-            # Create a RefreshToken object
             token = RefreshToken(refresh_token)
-            # Add the refresh token to the blacklist
             token.blacklist()
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
-            # If there's an error (e.g., invalid token), return a bad request response
             return Response(status=status.HTTP_400_BAD_REQUEST)
