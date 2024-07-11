@@ -13,29 +13,31 @@ class RegisterView(APIView):
 
     post:
     Register a new user and return JWT tokens.
+
+    Request Body:
+        {
+            "email": "string",
+            "password": "string",
+            "first_name": "string",
+            "last_name": "string",
+            "phone_number": "string"
+        }
+
+    Response:
+        201 Created - Successfully registered
+        {
+            'refresh': 'refresh_token',
+            'access': 'access_token'
+        }
+
+        400 Bad Request - Invalid data
+        {
+            'field_name': ['error_message']
+        }
     """
     permission_classes = [AllowAny]
 
     def post(self, request):
-        """
-        Register a new user.
-
-        Parameters:
-        - email (string): User's email address
-        - password (string): User's password
-        - other fields as required by CustomUserSerializer
-
-        Returns:
-        - 201 Created: User registered successfully
-            {
-                'refresh': 'refresh_token',
-                'access': 'access_token'
-            }
-        - 400 Bad Request: Invalid data
-            {
-                'field_name': ['error_message']
-            }
-        """
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
