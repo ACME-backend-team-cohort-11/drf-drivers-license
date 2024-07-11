@@ -28,9 +28,7 @@ SECRET_KEY = get_env_variable("SECRET_KEY")
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_bool_env("DEBUG")
-
-
+DEBUG = True 
 # Application definition
 
 INSTALLED_APPS = [
@@ -81,8 +79,6 @@ SIMPLE_JWT = {
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
-
-ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
@@ -159,3 +155,5 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.AllowAny",
     ],
 }
+
+ALLOWED_HOSTS=['*']
